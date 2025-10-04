@@ -1,0 +1,38 @@
+{
+  "name": "e-commerce-restful-api",
+  "version": "1.0.0",
+  "description": "Eccomerce API using Express, MongoDB",
+  "keywords": [
+    "e-commerce"
+  ],
+  "homepage": "https://github.com/raivenrt/e-commerce-restful-api#readme",
+  "bugs": {
+    "url": "https://github.com/raivenrt/e-commerce-restful-api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raivenrt/e-commerce-restful-api.git"
+  },
+  "license": "MIT",
+  "author": "ramy tawfik",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node ./build/configs/server",
+    "build": "tsc",
+    "dev": "tsx watch ./src/configs/server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.2",
+    "prettier": "3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1"
+  }
+}

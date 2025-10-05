@@ -35,7 +35,7 @@ export const getCategories: RequestHandler = async (req, res) => {
  * @EndPoint /categories GET
  * @ACL (User, Admin)
  * @Body {name*: string, image?: string} Application/JSON
- * @ResponseBody Category 201
+ * @ResponseBody {data: Category} 201
  */
 export const postCategory: RequestHandler = async (req, res) => {
   const category = await Category.create({
@@ -43,5 +43,77 @@ export const postCategory: RequestHandler = async (req, res) => {
     slug: slugify(req.body.name),
   });
 
-  res.status(201).json(category);
+  res.status(201).json({ data: category });
+};
+
+/**
+ * Get Specific Gategory By Id
+ *
+ * @EndPoint /categories/:id GET
+ * @RouteParams {id: mongoose.Types.ObjectId}
+ * @ACL Public
+ * @ResponseBody {
+ * data: Category
+ * } 200
+ */
+export const getSpecificCategory: RequestHandler = async (req, res) => {
+  const categoryId = req.params.id;
+  const category = await Category.findById(categoryId);
+
+  if (!category)
+    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+
+  res.status(200).json({
+    data: category,
+  });
+};
+
+/**
+ * Update Specific Gategory By Id
+ *
+ * @EndPoint /categories/:id PUT
+ * @RouteParams {id: mongoose.Types.ObjectId}
+ * @Body {name*: string} Application/JSON
+ * @ACL Private
+ * @ResponseBody {
+ * data: Category
+ * } 200
+ */
+export const putUpdateSpecificCategory: RequestHandler = async (req, res) => {
+  const categoryId = req.params.id;
+  const updatedCategory = await Category.findByIdAndUpdate(
+    categoryId,
+    {
+      name: req.body.name,
+      slug: slugify(req.body.name),
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!updatedCategory)
+    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+
+  res.status(200).json({
+    data: updatedCategory,
+  });
+};
+
+/**
+ * Delete Specific Gategory By Id
+ *
+ * @EndPoint /categories/:id DELETE
+ * @RouteParams {id: mongoose.Types.ObjectId}
+ * @ACL Private
+ * @ResponseBody NO_CONTENT 204
+ */
+export const deleteSpecificCategory: RequestHandler = async (req, res) => {
+  const categoryId = req.params.id;
+  const category = await Category.findByIdAndDelete(categoryId);
+
+  if (!category)
+    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+
+  res.status(204).end();
 };

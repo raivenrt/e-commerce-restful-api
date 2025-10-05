@@ -7,3 +7,13 @@ import initHttpServer from './init-http-server.js';
 const server = http.createServer(app);
 
 initHttpServer(server);
+
+// Catch Unhandled Rejections
+process.on('unhandledRejection', (err) => {
+  console.log(`Unhandled Rejection Error: ${err}`);
+
+  server.close(() => {
+    console.log('Server is down...');
+    process.exit(1);
+  });
+});

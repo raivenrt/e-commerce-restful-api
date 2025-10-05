@@ -1,6 +1,8 @@
 import express from 'express';
 import morgan from 'morgan';
 
+import apiV1Route from '@routes/router.js';
+
 const NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const app = express();
 
@@ -16,14 +18,7 @@ if (NODE_ENV === 'development') {
   app.use(morgan('short'));
 }
 
-app.get('/hello', (req, res) => {
-  res.send({
-    welcome: 'You are welcome!',
-    at: Intl.DateTimeFormat(req.acceptsLanguages(), {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(Date.now()),
-  });
-});
+// APIv1 root route
+app.use('/api/v1', apiV1Route);
 
 export default app;

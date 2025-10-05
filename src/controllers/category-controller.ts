@@ -1,7 +1,8 @@
 import Category from '@models/category-model.js';
 
-import type { RequestHandler } from 'express';
+import type { RequestHandler, Request } from 'express';
 import slugify from '@lib/slugify.js';
+import { responses } from '@lib/api-response.js';
 
 /**
  * Fetch all categories from database
@@ -13,20 +14,9 @@ import slugify from '@lib/slugify.js';
  * itemsCount: number
  * } 200
  */
-export const getCategories: RequestHandler = async (req, res) => {
-  const categories = await Category.find(
-    {},
-    {
-      __v: false,
-    },
-  );
-
-  const categoriesLen = categories.length;
-
-  res.status(200).json({
-    categories,
-    itemsCount: categoriesLen,
-  });
+export const getCategories: RequestHandler = async (req: Request, res) => {
+  const categories = await Category.find();
+  responses.success({ categories, count: categories.length }, res);
 };
 
 /**
@@ -43,7 +33,7 @@ export const postCategory: RequestHandler = async (req, res) => {
     slug: slugify(req.body.name),
   });
 
-  res.status(201).json({ data: category });
+  responses.success({ ...category.toJSON() }, res, 201);
 };
 
 /**
@@ -61,11 +51,13 @@ export const getSpecificCategory: RequestHandler = async (req, res) => {
   const category = await Category.findById(categoryId);
 
   if (!category)
-    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+    return responses.failed(
+      { id: `No category exists with this id ${categoryId}` },
+      res,
+      404,
+    );
 
-  res.status(200).json({
-    data: category,
-  });
+  responses.success({ ...category.toJSON() }, res, 200);
 };
 
 /**
@@ -93,11 +85,13 @@ export const putUpdateSpecificCategory: RequestHandler = async (req, res) => {
   );
 
   if (!updatedCategory)
-    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+    return responses.failed(
+      { id: `No category exists with this id ${categoryId}` },
+      res,
+      404,
+    );
 
-  res.status(200).json({
-    data: updatedCategory,
-  });
+  responses.success({ ...updatedCategory.toJSON() }, res, 200);
 };
 
 /**
@@ -113,7 +107,11 @@ export const deleteSpecificCategory: RequestHandler = async (req, res) => {
   const category = await Category.findByIdAndDelete(categoryId);
 
   if (!category)
-    return res.status(404).json({ msg: `No category exists with this id ${categoryId}` });
+    return responses.failed(
+      { id: `No category exists with this id ${categoryId}` },
+      res,
+      404,
+    );
 
-  res.status(204).end();
+  responses.success(null, res, 204);
 };

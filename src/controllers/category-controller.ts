@@ -2,6 +2,7 @@ import type { RequestHandler, Request } from 'express';
 
 import Category from '@models/category-model.js';
 import { responses } from '@lib/api-response.js';
+import pagination from '@lib/pagination.js';
 
 /**
  * Fetch all categories from database
@@ -14,8 +15,28 @@ import { responses } from '@lib/api-response.js';
  * } 200
  */
 export const getCategories: RequestHandler = async (req: Request, res) => {
-  const categories = await Category.find();
-  responses.success({ categories, count: categories.length }, res);
+  const categoriesCount = await Category.countDocuments();
+
+  const paginationRes = pagination({
+    documentsCount: categoriesCount,
+    limit: +req.query.limit!,
+    page: +req.query.page!,
+  });
+
+  const categories = await Category.find(
+    {},
+    {},
+    { skip: paginationRes.skip, limit: paginationRes.limit },
+  );
+
+  responses.success(
+    {
+      data: categories,
+      ...paginationRes,
+    },
+    res,
+    200,
+  );
 };
 
 /**

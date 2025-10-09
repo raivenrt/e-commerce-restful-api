@@ -121,3 +121,33 @@ export const updateCategorySchema = [
     },
   }),
 ];
+
+/**
+ * Validation schema for retrieving categories with optional pagination.
+ *
+ * This schema validates the following query parameters:
+ * - `page` (optional): Must be an integer greater than 0. If provided, it is converted to an integer.
+ * - `limit` (optional): Must be an integer greater than 0. If provided, it is converted to an integer.
+ *
+ * Used with express-validator's `checkSchema` to ensure correct query parameter types and values.
+ */
+export const getCategoriesSchema = checkSchema({
+  page: {
+    in: ['query'],
+    optional: true,
+    isInt: {
+      options: { min: 1 },
+      errorMessage: 'page must be an integer greater than 0',
+    },
+    toInt: true,
+  },
+  limit: {
+    in: ['query'],
+    optional: true,
+    isInt: {
+      options: { min: 1 },
+      errorMessage: 'limit must be an integer greater than 0',
+    },
+    toInt: true,
+  },
+});

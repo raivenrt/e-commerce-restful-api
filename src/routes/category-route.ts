@@ -10,6 +10,7 @@ import {
 import {
   categoryIdParamSchema,
   createCategorySchema,
+  getCategoriesSchema,
   updateCategorySchema,
 } from '@lib/validators/category-validators.js';
 import validationResult from '@middlewares/validation-result.js';
@@ -18,7 +19,7 @@ const router = Router();
 
 router
   .route('/')
-  .get(getCategories)
+  .get(getCategoriesSchema, validationResult, getCategories)
   .post(createCategorySchema, validationResult, postCategory);
 
 router

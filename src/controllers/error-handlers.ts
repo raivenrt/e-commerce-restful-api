@@ -39,6 +39,9 @@ const globalErrorHandler: ErrorRequestHandler = async (error, req, res, next) =>
   //   if (error instanceof MongooseError)
   //     return responses.error('Internal Server Error', res, 500);
 
+  // if (error instanceof z.ZodError) {
+  // responses.failed(z.treeifyError(error), res, 422);
+  // } else responses.error(error.message ?? 'Internal Server Error', res, 500);
   responses.error(error.message ?? 'Internal Server Error', res, 500);
 };
 

@@ -23,7 +23,11 @@ export const getSubCategories: RequestHandler = async (req, res) => {
   const subcategories = await SubCategory.find(
     {},
     {},
-    { skip: paginationRes.skip, limit: paginationRes.limit },
+    {
+      skip: paginationRes.skip,
+      limit: paginationRes.limit,
+      populate: { path: 'category', select: { name: true, slug: true, _id: true } },
+    },
   );
 
   responses.success(
@@ -60,7 +64,13 @@ export const postSubCategory: RequestHandler = async (req, res) => {
  */
 export const getSpecificSubCategory: RequestHandler = async (req, res) => {
   const subcategoryId = req.params.id;
-  const subcategory = await SubCategory.findById(subcategoryId);
+  const subcategory = await SubCategory.findById(
+    subcategoryId,
+    {},
+    {
+      populate: { path: 'category', select: { name: true, slug: true, _id: true } },
+    },
+  );
 
   responses.success(subcategory, res, 200);
 };

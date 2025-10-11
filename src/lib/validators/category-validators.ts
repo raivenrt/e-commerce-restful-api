@@ -4,18 +4,22 @@ import Category from '@models/category-model.js';
 import slugify from '@lib/slugify.js';
 
 /**
- * Validation schema for the `id` parameter in route parameters.
+ * Validation schema for validating category ID parameters in routes.
  *
- * This schema ensures that:
- * - The `id` parameter is present and not empty.
- * - The `id` parameter is a valid MongoDB ObjectId.
- * - The `id` corresponds to an existing category in the database.
+ * This schema checks:
+ * - `id` (in route params): Required, must not be empty, must be a valid MongoDB ObjectId, and must reference an existing Category.
+ * - `categoryId` (in route params, optional): If present, must be a valid MongoDB ObjectId and must reference an existing Category.
  *
- * If any of these checks fail, an appropriate error message is returned.
+ * If any validation fails, an appropriate error message is returned.
  *
  * @remarks
- * This schema is intended to be used with express-validator's `checkSchema` middleware
- * for validating category-related route parameters.
+ * Use this schema as middleware with express-validator's `checkSchema` for routes that require a valid category ID.
+ *
+ * Example usage:
+ * ```ts
+ * router.get('/categories/:id', categoryIdParamSchema, controller.getCategory);
+ * router.get('/categories/:categoryId/items', categoryIdParamSchema, controller.getItemsByCategory);
+ * ```
  */
 export const categoryIdParamSchema = checkSchema({
   id: {
@@ -29,6 +33,63 @@ export const categoryIdParamSchema = checkSchema({
         if (!category) throw new Error(`No category exists with this id ${value}`);
 
         return true;
+      },
+    },
+  },
+  categoryId: {
+    in: ['params'],
+    optional: true,
+    isMongoId: { errorMessage: 'Invalid format' },
+    custom: {
+      options: async (value: string) => {
+        const category = await Category.findById(value);
+
+        if (!category) throw new Error(`No category exists with this id ${value}`);
+
+        return true;
+      },
+    },
+  },
+});
+
+/**
+ * Validation schema for validating the `categoryId` parameter in nested routes.
+ *
+ * This schema checks:
+ * - `categoryId` (in route params): Required, must not be empty, must be a valid MongoDB ObjectId, and must reference an existing Category.
+ * - For `GET` and `POST` requests where the path ends with `/`, it:
+ *   - Ensures the parent category exists.
+ *   - Sets `req.filterQuery` to filter by the category.
+ *   - For `POST` requests, also sets `req.body.category` to the category ID.
+ *
+ * If any validation fails, an appropriate error message is returned.
+ *
+ * @remarks
+ * Use this schema as middleware with express-validator's `checkSchema` for nested category routes.
+ *
+ * Example usage:
+ * ```ts
+ * router.get('/categories/:categoryId/items', nestedRouteCategoryIdSchema, controller.getItemsByCategory);
+ * router.post('/categories/:categoryId/items', nestedRouteCategoryIdSchema, controller.createItemInCategory);
+ * ```
+ */
+export const nestedRouteCategoryIdSchema = checkSchema({
+  categoryId: {
+    in: ['params'],
+    notEmpty: { errorMessage: 'must be not empty' },
+    isMongoId: { errorMessage: 'Invalid format' },
+    custom: {
+      options: async (value: string, { req }) => {
+        if (['GET', 'POST'].includes(req.method) && req.path.endsWith('/')) {
+          const category = await Category.findById(value);
+          if (!category)
+            throw new Error(`No parent category exists with this id ${value}`);
+
+          req.filterQuery = { category: value };
+          if (['POST'].includes(req.method)) req.body.category = value;
+
+          return true;
+        }
       },
     },
   },

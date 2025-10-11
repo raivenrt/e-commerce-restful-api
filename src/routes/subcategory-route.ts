@@ -17,7 +17,7 @@ import {
 
 import validationResult from '@middlewares/validation-result.js';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router
   .route('/')

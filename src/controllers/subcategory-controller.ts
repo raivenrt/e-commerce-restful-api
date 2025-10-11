@@ -12,7 +12,9 @@ import SubCategory from '@models/subcategory-model.js';
  * @ResponseBody JSEND 200
  */
 export const getSubCategories: RequestHandler = async (req, res) => {
-  const subCategoriesCount = await SubCategory.countDocuments();
+  const filter: { category?: string } = req.filterQuery ?? {};
+
+  const subCategoriesCount = await SubCategory.countDocuments(filter);
 
   const paginationRes = pagination({
     documentsCount: subCategoriesCount,
@@ -21,7 +23,7 @@ export const getSubCategories: RequestHandler = async (req, res) => {
   });
 
   const subcategories = await SubCategory.find(
-    {},
+    filter,
     {},
     {
       skip: paginationRes.skip,
@@ -63,9 +65,9 @@ export const postSubCategory: RequestHandler = async (req, res) => {
  * @ResponseBody JSEND 200
  */
 export const getSpecificSubCategory: RequestHandler = async (req, res) => {
-  const subcategoryId = req.params.id;
-  const subcategory = await SubCategory.findById(
-    subcategoryId,
+  const filter: { category?: string } = req.filterQuery ?? {};
+  const subcategory = await SubCategory.findOne(
+    { ...filter, _id: req.params.id },
     {},
     {
       populate: { path: 'category', select: { name: true, slug: true, _id: true } },

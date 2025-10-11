@@ -5,17 +5,25 @@ import slugify from '@lib/slugify.js';
 import Category from '@models/category-model.js';
 
 /**
- * Validation schema for the `id` parameter in route params, intended for subcategory identification.
+ * Validation schema for validating the `id` parameter in subcategory routes.
  *
- * This schema ensures that:
- * - The `id` parameter is present and not empty.
+ * This schema ensures:
+ * - The `id` parameter exists in the route parameters and is not empty.
  * - The `id` is a valid MongoDB ObjectId.
- * - The `id` corresponds to an existing `SubCategory` document in the database.
+ * - A SubCategory with the given `id` exists in the database.
+ * - If a `categoryId` parameter is present in the route, it checks:
+ *   - The parent Category exists.
+ *   - The SubCategory belongs to the specified parent Category.
  *
- * If any of these validations fail, an appropriate error message is provided.
+ * If any validation fails, an appropriate error message is returned.
  *
  * @remarks
- * This schema is designed to be used with express-validator's `checkSchema` middleware.
+ * Use this schema as middleware with express-validator's `checkSchema` for routes that require a valid subcategory ID.
+ *
+ * Example usage:
+ * ```ts
+ * router.get('/categories/:categoryId/subcategories/:id', subCategoryIdParamSchema, controller.getSubCategory);
+ * ```
  */
 export const subCategoryIdParamSchema = checkSchema({
   id: {
@@ -23,10 +31,32 @@ export const subCategoryIdParamSchema = checkSchema({
     notEmpty: { errorMessage: 'must be not empty' },
     isMongoId: { errorMessage: 'Invalid format' },
     custom: {
-      options: async (value: string) => {
-        const subcategory = await SubCategory.findById(value);
+      options: async (value: string, { req }) => {
+        const subcategory = await SubCategory.findById(
+          value,
+          {},
+          {
+            populate: { path: 'category', select: { name: true, _id: true } },
+          },
+        );
 
         if (!subcategory) throw new Error(`No SubCategory exists with this id ${value}`);
+
+        const parentCategoryId = req.params?.categoryId ?? false;
+        if (parentCategoryId) {
+          const parentCategory = await Category.findById(parentCategoryId);
+
+          if (!parentCategory)
+            throw new Error(`No parent category exists with this id ${value}`);
+
+          if (
+            subcategory.category instanceof Category &&
+            String(subcategory.category._id) !== parentCategoryId
+          )
+            throw new Error(
+              `SubCategory '${subcategory.name}' dosn't belongs to '${parentCategory.name}' it belongs to '${subcategory.category.name}'`,
+            );
+        }
 
         return true;
       },
@@ -141,10 +171,14 @@ export const updateSubCategorySchema = [
         options: async (value, { req }) => {
           const subcategory = await SubCategory.findOne({ name: value });
 
-          if (subcategory)
-            throw new Error(
-              `Can't update SubCategory name to ${value} becuse it's exists`,
-            );
+          if (subcategory) {
+            if (subcategory.name === value && String(subcategory._id) === req.params?.id)
+              throw new Error(`This subcategory already named ${subcategory.name}`);
+            else
+              throw new Error(
+                `Can't update SubCategory name to '${value}' becuse it's already used by other subcategory`,
+              );
+          }
 
           req.body.slug = slugify(value);
           return true;
@@ -160,7 +194,7 @@ export const updateSubCategorySchema = [
         errorMessage: 'invalid category id format',
       },
       custom: {
-        options: async (value) => {
+        options: async (value, { req }) => {
           const parentCategory = await Category.findById(value);
 
           if (!parentCategory)

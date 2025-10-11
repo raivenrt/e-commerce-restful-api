@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import subCategoryRoute from '@routes/subcategory-route.js';
+
 import {
   getCategories,
   postCategory,
@@ -11,11 +13,20 @@ import {
   categoryIdParamSchema,
   createCategorySchema,
   getCategoriesSchema,
+  nestedRouteCategoryIdSchema,
   updateCategorySchema,
 } from '@lib/validators/category-validators.js';
 import validationResult from '@middlewares/validation-result.js';
 
 const router = Router();
+
+// Nested Route
+router.use(
+  '/:categoryId/subcategories',
+  nestedRouteCategoryIdSchema,
+  validationResult,
+  subCategoryRoute,
+);
 
 router
   .route('/')

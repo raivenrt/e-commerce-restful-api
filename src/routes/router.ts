@@ -3,6 +3,7 @@ import { Router } from 'express';
 import categoryRoute from '@routes/category-route.js';
 import subCategoryRoute from '@routes/subcategory-route.js';
 import brandsRoute from '@routes/brand-route.js';
+import productsRoute from '@routes/product-route.js';
 
 const router = Router();
 
@@ -10,5 +11,6 @@ const router = Router();
 router.use('/categories', categoryRoute);
 router.use('/subcategories', subCategoryRoute);
 router.use('/brands', brandsRoute);
+router.use('/products', productsRoute);
 
 export default router;

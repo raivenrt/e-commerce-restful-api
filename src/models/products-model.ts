@@ -19,7 +19,7 @@ interface IProduct {
 
   category: Schema.Types.ObjectId;
 
-  subcategory?: Schema.Types.ObjectId;
+  subcategories?: Schema.Types.ObjectId;
   brand?: Schema.Types.ObjectId;
 
   ratingsAverage?: number;
@@ -83,7 +83,7 @@ const productSchema = new Schema<ProductDocument>(
       required: [true, 'must be belong to category'],
     },
 
-    subcategory: [
+    subcategories: [
       {
         type: Schema.Types.ObjectId,
         ref: 'subcategory',

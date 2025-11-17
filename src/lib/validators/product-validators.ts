@@ -6,6 +6,7 @@ import Product from '@models/products-model.js';
 import Category from '@models/category-model.js';
 import SubCategory from '@models/subcategory-model.js';
 import Brand from '@models/brand-model.js';
+import { Types } from 'mongoose';
 
 /**
  * Validation schema for validating product ID parameter in routes.
@@ -205,20 +206,36 @@ export const createProductSchema = [
       },
     },
 
-    subcategory: {
+    subcategories: {
       optional: true,
-      isMongoId: {
-        errorMessage: 'invalid id foramt',
+      isArray: {
+        errorMessage: 'must be an array',
       },
       custom: {
-        options: async (subcategoryIdArg, { req: { body } }) => {
-          const subcategory = await SubCategory.findById(subcategoryIdArg);
+        options: async (subcategoriesIdList: any[], { req: { body } }) => {
+          const isValidList = subcategoriesIdList.every((id) =>
+            Types.ObjectId.isValid(id),
+          );
 
-          if (!subcategory)
-            throw new Error(`no subcategory exists with this id ${subcategoryIdArg}`);
+          if (!isValidList) throw new Error('invalid subcategories id format');
 
-          if (!body.category || subcategory.category.toString() !== body.category)
-            throw new Error(`subcategory dosn't belongs to '${body.category}' category`);
+          const subcategories = await SubCategory.find({
+            _id: { $in: subcategoriesIdList, $exists: true },
+            category: body.category,
+          });
+
+          const existsSubCategories = subcategories.map((subcategory) =>
+            subcategory.toJSON()._id.toString(),
+          );
+
+          const notExistsSubCategories = subcategoriesIdList.filter(
+            (id) => !existsSubCategories.includes(id),
+          );
+
+          if (notExistsSubCategories.length > 0)
+            throw new Error(
+              `no subcategory exists with this id [${notExistsSubCategories.join(', ')}], or not belong to category ${body.category}`,
+            );
 
           return true;
         },
@@ -459,20 +476,36 @@ export const updateProductSchema = [
       },
     },
 
-    subcategory: {
+    subcategories: {
       optional: true,
-      isMongoId: {
-        errorMessage: 'invalid id foramt',
+      isArray: {
+        errorMessage: 'must be an array',
       },
       custom: {
-        options: async (subcategoryIdArg, { req: { body } }) => {
-          const subcategory = await SubCategory.findById(subcategoryIdArg);
+        options: async (subcategoriesIdList: any[], { req: { body } }) => {
+          const isValidList = subcategoriesIdList.every((id) =>
+            Types.ObjectId.isValid(id),
+          );
 
-          if (!subcategory)
-            throw new Error(`no subcategory exists with this id ${subcategoryIdArg}`);
+          if (!isValidList) throw new Error('invalid subcategories id format');
 
-          if (!body.category || subcategory.category.toString() !== body.category)
-            throw new Error(`subcategory dosn't belongs to '${body.category}' category`);
+          const subcategories = await SubCategory.find({
+            _id: { $in: subcategoriesIdList, $exists: true },
+            category: body.category,
+          });
+
+          const existsSubCategories = subcategories.map((subcategory) =>
+            subcategory.toJSON()._id.toString(),
+          );
+
+          const notExistsSubCategories = subcategoriesIdList.filter(
+            (id) => !existsSubCategories.includes(id),
+          );
+
+          if (notExistsSubCategories.length > 0)
+            throw new Error(
+              `no subcategory exists with this id [${notExistsSubCategories.join(', ')}], or not belong to category ${body.category}`,
+            );
 
           return true;
         },

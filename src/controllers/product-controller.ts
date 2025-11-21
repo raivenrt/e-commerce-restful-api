@@ -1,8 +1,10 @@
 import type { RequestHandler, Request } from 'express';
 
-import Product from '@models/products-model.js';
+import Product, { type IProduct } from '@models/products-model.js';
 import { responses } from '@lib/api-response.js';
 import pagination from '@lib/pagination.js';
+
+import ApiQueryFeatures from '../lib/api-query-features.js';
 
 /**
  * Fetch all products from database
@@ -11,20 +13,29 @@ import pagination from '@lib/pagination.js';
  * @ACL Public
  * @ResponseBody `JSEND` 200
  */
-export const getProducts: RequestHandler = async (req: Request, res) => {
-  const productsCount = await Product.countDocuments();
 
+export const getProducts: RequestHandler = async (req: Request, res) => {
+  const { filter, projection, queryOptions } = new ApiQueryFeatures<IProduct>(
+    {
+      search: { f: 'keyword', fields: ['title', 'description'] },
+      sort: { f: 'sort' },
+      projection: { f: 'select' },
+      populate: { f: 'populate', execlude: ['brand'], ignoreInvalid: true },
+    },
+    req.query,
+  );
+
+  const productsCount = await Product.countDocuments(filter);
   const paginationRes = pagination({
     documentsCount: productsCount,
     limit: +req.query.limit!,
     page: +req.query.page!,
   });
 
-  const products = await Product.find(
-    {},
-    {},
-    { skip: paginationRes.skip, limit: paginationRes.limit },
-  );
+  queryOptions.skip = paginationRes.skip;
+  queryOptions.limit = paginationRes.limit;
+
+  const products = await Product.find(filter, projection, queryOptions);
 
   responses.success(
     {

@@ -31,13 +31,13 @@ export interface IProduct {
 
 export interface ProductDocument extends IProduct, Document {}
 
-const productSchema = new Schema<ProductDocument>(
+export const productSchema = new Schema<ProductDocument>(
   {
     title: {
       type: String,
       required: [true, 'please fill this field'],
       trim: true,
-      minLength: [3, 'too short'],
+      minLength: [2, 'too short'],
       maxLength: [128, 'too long'],
     },
     slug: {

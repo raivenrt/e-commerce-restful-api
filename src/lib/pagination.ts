@@ -1,4 +1,4 @@
-type PaginationDataT = {
+export type PaginationOptions = {
   documentsCount: number;
   limit?: number;
   page?: number;
@@ -7,7 +7,7 @@ type PaginationDataT = {
 /**
  * Calculates pagination details based on the total number of documents, limit per page, and current page.
  *
- * @param {PaginationDataT} params - The pagination parameters.
+ * @param {PaginationOptions} params - The pagination parameters.
  * @param {number} params.documentsCount - Total number of documents available.
  * @param {number} [params.limit] - Maximum number of documents per page. Defaults to the total document count if not provided.
  * @param {number} [params.page=1] - The current page number. Defaults to 1.
@@ -36,7 +36,7 @@ export default function pagination({
   documentsCount,
   limit: argLimit = 10,
   page: argPage = 1,
-}: PaginationDataT) {
+}: PaginationOptions) {
   const limit = argLimit || 10;
   const page = argPage || 1;
 

@@ -11,7 +11,7 @@ export interface ISubCategory {
 
 export interface SubCategoryDocument extends ISubCategory, Document {}
 
-const subcategorySchema = new Schema<SubCategoryDocument>(
+export const subcategorySchema = new Schema<SubCategoryDocument>(
   {
     name: {
       type: String,

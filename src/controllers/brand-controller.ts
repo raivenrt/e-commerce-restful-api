@@ -1,100 +1,70 @@
-import type { RequestHandler, Request } from 'express';
+import type { RequestHandler } from 'express';
 
 import Brand from '@models/brand-model.js';
-import { responses } from '@lib/api-response.js';
-import pagination from '@lib/pagination.js';
+import { CRUD } from '../lib/crud.js';
+
+const operations = new CRUD({
+  model: Brand,
+  apiQueryFeatures: {
+    search: { f: 'keyword', fields: ['name'] },
+    sort: { f: 'sort' },
+    projection: { f: 'select' },
+  },
+});
 
 /**
  * Fetch all brands from database
  *
- * @EndPoint /brands `GET`
- * @ACL Public
- * @ResponseBody `JSEND` 200
+ * @route `(/brands)` GET
+ * @acl -
+ * @response JSEND 200
+ * @query? `
+ * {
+ *   keyword: 'App',
+ *   sort: { createdAt: '1' },
+ *   select: [ 'name' ],
+ * }
+ * `
  */
-export const getBrands: RequestHandler = async (req: Request, res) => {
-  const brandsCount = await Brand.countDocuments();
-
-  const paginationRes = pagination({
-    documentsCount: brandsCount,
-    limit: +req.query.limit!,
-    page: +req.query.page!,
-  });
-
-  const brands = await Brand.find(
-    {},
-    {},
-    { skip: paginationRes.skip, limit: paginationRes.limit },
-  );
-
-  responses.success(
-    {
-      data: brands,
-      ...paginationRes,
-    },
-    res,
-    200,
-  );
-};
+export const getBrands: RequestHandler = operations.GET_ALL;
 
 /**
  * Create a new brand
  *
- * @EndPoint /brands `POST`
- * @ACL (User, Admin)
- * @Body {name*: string, image?: string} `Application/JSON`
- * @ResponseBody `JSEND` 201
+ * @route `(/brands)` POST
+ * @acl -
+ * @body `{ name*: string, image?: string (URL, Path), slug?: string }` Application/JSON
+ * @response JSEND 201
  */
-export const postBrand: RequestHandler = async (req, res) => {
-  const brand = await Brand.create(req.body);
-
-  responses.success({ ...brand.toJSON() }, res, 201);
-};
+export const postBrand: RequestHandler = operations.POST_CREATE;
 
 /**
- * Get Specific Brand By Id
+ * Fetch Specific brand By Id
  *
- * @EndPoint /brands/:id `GET`
- * @RouteParams {id: mongoose.Types.ObjectId}
- * @ACL Public
- * @ResponseBody `JSEND` 200
+ * @route `(/brands/:id)` GET
+ * @acl -
+ * @params `{ id: mongoose.Types.ObjectId }`
+ * @response JSEND 200
  */
-export const getSpecificBrand: RequestHandler = async (req, res) => {
-  const brandId = req.params.id;
-  const brand = await Brand.findById(brandId);
-
-  responses.success(brand, res, 200);
-};
+export const getSpecificBrand: RequestHandler = operations.GET_SPECIFIC;
 
 /**
- * Update Specific Brand By Id
+ * Update Specific brand By Id
  *
- * @EndPoint /brands/:id `PUT`
- * @RouteParams {id: mongoose.Types.ObjectId}
- * @Body {name*: string} `Application/JSON`
- * @ACL Private
- * @ResponseBody `JSEND` 200
+ * @route `(/brands/:id)` `PUT`
+ * @acl -
+ * @body { name?: string, image?: string (URL, Path), slug?: string } `Application/JSON`
+ * @params `{ id: mongoose.Types.ObjectId }`
+ * @response JSEND 200
  */
-export const putUpdateSpecificBrand: RequestHandler = async (req, res) => {
-  const brandId = req.params.id;
-  const updatedBrand = await Brand.findByIdAndUpdate(brandId, req.body, {
-    new: true,
-  });
-
-  responses.success(updatedBrand, res, 200);
-};
+export const putUpdateSpecificBrand: RequestHandler = operations.PUT_SPECIFIC;
 
 /**
- * Delete Specific Brand By Id
+ * Delete Specific brand By Id
  *
- * @EndPoint /brands/:id `DELETE`
- * @RouteParams {id: mongoose.Types.ObjectId}
- * @ACL Private
- * @ResponseBody `NO_CONTENT` 204
+ * @route `(/brands/:id)` `DELETE`
+ * @acl -
+ * @params `{ id: mongoose.Types.ObjectId }`
+ * @response NO_CONTENT 204
  */
-export const deleteSpecificBrand: RequestHandler = async (req, res) => {
-  const brandId = req.params.id;
-
-  await Brand.findByIdAndDelete(brandId);
-
-  responses.success(null, res, 204);
-};
+export const deleteSpecificBrand: RequestHandler = operations.DELETE_SPECIFIC;

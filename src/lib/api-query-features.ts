@@ -44,18 +44,50 @@ type TParsed = Partial<{
   populate: TPopulateReturn;
 }>;
 
+export type ApiQueryFeaturesOptions<F extends object> = Partial<{
+  projection: GlobalParserOptions & { execlude?: (keyof F)[] };
+  populate: GlobalParserOptions & { execlude?: (keyof F)[]; ignoreInvalid?: boolean };
+  sort: GlobalParserOptions;
+  search: GlobalParserOptions & { fields: (keyof F)[] };
+}>;
+
+/**
+ * A class for parsing and processing query parameters for MongoDB queries using Mongoose.
+ *
+ * This class provides methods to search, sort, select, and populate documents based on the query parameters.
+ *
+ * @template F - The type of the query document.
+ * @property {FilterQuery<F>} filter - The filter query.
+ * @property {ProjectionType<F>} projection - The projection query.
+ * @property {QueryOptions<F>} queryOptions - The query options.
+ * @property {TParsed} parsed - The parsed query parameters.
+ *
+ * @constructor
+ * @param {ApiQueryFeaturesOptions<F>} [options={}] - The options for parsing the query parameters.
+ * @param {QueryString.ParsedQs} [query={}] - The query parameters to parse.
+ *
+ * @example
+ * const apiQueryFeatures = new ApiQueryFeatures<F>({
+ *   search: { f: 'search', fields: ['name', 'description'] },
+ *   sort: { f: 'sort' },
+ *   projection: { f: 'projection', exclude: ['password'] },
+ *   populate: { f: 'populate', exclude: ['user'] },
+ * }
+ *
+ * const result = await apiQueryFeatures.search();
+ * const searchResult = apiQueryFeatures.parsed.search;
+ * const sortResult = apiQueryFeatures.parsed.sort;
+ * const selectResult = apiQueryFeatures.parsed.select;
+ * const populateResult = apiQueryFeatures.parsed.populate;
+ */
 export default class ApiQueryFeatures<F extends object> {
   public filter: FilterQuery<F> = {};
   public projection: ProjectionType<F> = {};
   public queryOptions: QueryOptions<F> = {};
   public parsed: TParsed = {};
+
   constructor(
-    options: Partial<{
-      projection: GlobalParserOptions & { execlude?: (keyof F)[] };
-      populate: GlobalParserOptions & { execlude?: (keyof F)[]; ignoreInvalid?: boolean };
-      sort: GlobalParserOptions;
-      search: GlobalParserOptions & { fields: (keyof F)[] };
-    }> = {},
+    options: ApiQueryFeaturesOptions<F> = {},
     protected query: QueryString.ParsedQs = {},
   ) {
     const { search, sort, projection, populate } = options;
@@ -85,6 +117,14 @@ export default class ApiQueryFeatures<F extends object> {
     }
   }
 
+  /**
+   * Parses the search query parameters and returns an object with the parsed fields, keyword, and query.
+   *
+   * @param {GlobalParserOptions & { fields: (keyof F)[] }} options - The options for parsing the search query parameters.
+   * @param {QueryString.ParsedQs} query - The query parameters to parse.
+   * @returns {TSearchReturn} An object with the parsed fields, keyword, and query.
+   * @reqQuery {`[options.search.f]`: string}
+   */
   search(
     options: GlobalParserOptions & { fields: (keyof F)[] },
     query: QueryString.ParsedQs,
@@ -108,6 +148,14 @@ export default class ApiQueryFeatures<F extends object> {
     };
   }
 
+  /**
+   * Parses the sort query parameters and returns an object with the sort fields and their corresponding order.
+   *
+   * @param {GlobalParserOptions} options - The options for parsing the sort query parameters.
+   * @param {QueryString.ParsedQs} query - The query parameters to parse.
+   * @returns {TSortReturn} An object with the sort fields and their corresponding order.
+   * @reqQuery {`[options.sort.f]`: { updatedAt: 'asc', createdAt: '1' }}
+   */
   sort(options: GlobalParserOptions, query: QueryString.ParsedQs): TSortReturn {
     const qd = query[options.f];
     const sort: TSortReturn = {
@@ -127,6 +175,14 @@ export default class ApiQueryFeatures<F extends object> {
     return sort;
   }
 
+  /**
+   * Parses the select query parameters and returns an object with the selected fields and their corresponding projection.
+   *
+   * @param {GlobalParserOptions & { exclude?: (keyof F)[] }} options - The options for parsing the select query parameters.
+   * @param {QueryString.ParsedQs} query - The query parameters to parse.
+   * @returns {TSelectReturn} An object with the selected fields and their corresponding projection.
+   * @reqQuery {`[options.projection.f]`: [ 'price', 'category', 'title', '-_id' ]
+   */
   select(
     { execlude = [], ...options }: GlobalParserOptions & { execlude?: (keyof F)[] },
     query: QueryString.ParsedQs,
@@ -171,6 +227,14 @@ export default class ApiQueryFeatures<F extends object> {
     return select;
   }
 
+  /**
+   * Parses the populate query parameters and returns an object with the populated fields and their corresponding paths and selections.
+   *
+   * @param {GlobalParserOptions & { exclude?: (keyof F)[]; ignoreInvalid?: boolean }} options - The options for parsing the populate query parameters.
+   * @param {QueryString.ParsedQs} query - The query parameters to parse.
+   * @returns {TPopulateReturn} An object with the populated fields and their corresponding paths and selections.
+   * @reqQuery {`[options.projection.f]`: { profile: '*', posts: [ '-__v', '-updatedAt', '-createdAt' ] }
+   */
   populate(
     {
       execlude = [],

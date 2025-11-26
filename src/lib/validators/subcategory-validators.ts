@@ -4,27 +4,6 @@ import SubCategory from '@models/subcategory-model.js';
 import slugify from '@lib/slugify.js';
 import Category from '@models/category-model.js';
 
-/**
- * Validation schema for validating the `id` parameter in subcategory routes.
- *
- * This schema ensures:
- * - The `id` parameter exists in the route parameters and is not empty.
- * - The `id` is a valid MongoDB ObjectId.
- * - A SubCategory with the given `id` exists in the database.
- * - If a `categoryId` parameter is present in the route, it checks:
- *   - The parent Category exists.
- *   - The SubCategory belongs to the specified parent Category.
- *
- * If any validation fails, an appropriate error message is returned.
- *
- * @remarks
- * Use this schema as middleware with express-validator's `checkSchema` for routes that require a valid subcategory ID.
- *
- * Example usage:
- * ```ts
- * router.get('/categories/:categoryId/subcategories/:id', subCategoryIdParamSchema, controller.getSubCategory);
- * ```
- */
 export const subCategoryIdParamSchema = checkSchema({
   id: {
     in: ['params'],
@@ -63,25 +42,6 @@ export const subCategoryIdParamSchema = checkSchema({
     },
   },
 });
-
-/**
- * Validation schema for creating a new SubCategory.
- *
- * This schema validates the following fields in the request body:
- * - `name`: Required string, trimmed, must be unique, and between 2 and 32 characters.
- *   - Automatically generates a slug from the name and assigns it to `req.body.slug`.
- * - `category`: Required, must be a valid MongoDB ObjectId, and must reference an existing Category.
- *
- * If any validation fails, an appropriate error message is returned.
- *
- * @remarks
- * Use this schema as middleware with express-validator's `checkSchema` for subcategory creation routes.
- *
- * Example usage:
- * ```ts
- * router.post('/subcategories', createSubCategorySchema, controller.createSubCategory);
- * ```
- */
 
 export const createSubCategorySchema = checkSchema({
   name: {
@@ -129,25 +89,6 @@ export const createSubCategorySchema = checkSchema({
   },
 });
 
-/**
- * Validation schema for updating an existing SubCategory.
- *
- * This schema validates:
- * - The `id` parameter in the route params to ensure it is a valid MongoDB ObjectId and references an existing SubCategory.
- * - The `name` field in the request body (if provided): must be a string, trimmed, unique, and between 2 and 32 characters.
- *   - If provided, automatically generates a slug from the name and assigns it to `req.body.slug`.
- * - The `category` field in the request body (if provided): must be a valid MongoDB ObjectId and reference an existing Category.
- *
- * If any validation fails, an appropriate error message is returned.
- *
- * @remarks
- * Use this schema as middleware with express-validator's `checkSchema` for subcategory update routes.
- *
- * Example usage:
- * ```ts
- * router.put('/subcategories/:id', updateSubCategorySchema, controller.updateSubCategory);
- * ```
- */
 export const updateSubCategorySchema = [
   ...subCategoryIdParamSchema,
   ...checkSchema({
@@ -207,23 +148,6 @@ export const updateSubCategorySchema = [
   }),
 ];
 
-/**
- * Validation schema for retrieving subcategories with pagination.
- *
- * This schema validates the following query parameters:
- * - `page`: Optional. Must be an integer greater than 0. Converts the value to an integer.
- * - `limit`: Optional. Must be an integer greater than 0. Converts the value to an integer.
- *
- * If any validation fails, an appropriate error message is returned.
- *
- * @remarks
- * Use this schema as middleware with express-validator's `checkSchema` for subcategory listing routes.
- *
- * Example usage:
- * ```ts
- * router.get('/subcategories', getSubCategoriesSchema, controller.getSubCategories);
- * ```
- */
 export const getSubCategoriesSchema = checkSchema({
   page: {
     in: ['query'],

@@ -10,13 +10,13 @@ export interface ICategory {
 
 export interface CategoryDocument extends ICategory, Document {}
 
-const categorySchema = new Schema<CategoryDocument>(
+export const categorySchema = new Schema<CategoryDocument>(
   {
     name: {
       type: String,
       required: [true, 'please fill this field.'],
       unique: [true, 'already exists'],
-      minlength: [3, 'too short'],
+      minlength: [2, 'too short'],
       maxlength: [32, 'too long'],
     },
     slug: {

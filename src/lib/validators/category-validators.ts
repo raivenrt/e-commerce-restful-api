@@ -37,21 +37,6 @@ const schema: Schema = {
     isString: {
       errorMessage: 'must be a string value',
     },
-    custom: {
-      options: (value) => {
-        const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(value);
-
-        const isPath = /^(\.{1,2}\/|\/|[a-zA-Z0-9_\-]+\/?)+[a-zA-Z0-9_\-\.]+$/.test(
-          value,
-        );
-
-        if (!isUrl && !isPath) {
-          throw new Error('must be a valid URL or valid path');
-        }
-
-        return true;
-      },
-    },
   },
 };
 

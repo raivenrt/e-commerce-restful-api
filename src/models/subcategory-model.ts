@@ -1,5 +1,9 @@
 import { Document, model, Schema } from 'mongoose';
 import Category, { type CategoryDocument } from '@models/category-model.js';
+import {
+  mongoosePostDeleteMiddleware,
+  mongoosePreUpdateMiddleware,
+} from '@middlewares/upload.js';
 
 export interface ISubCategory {
   name: string;
@@ -33,6 +37,9 @@ export const subcategorySchema = new Schema<SubCategoryDocument>(
   },
   { timestamps: true },
 );
+
+subcategorySchema.post('findOneAndDelete', mongoosePostDeleteMiddleware);
+subcategorySchema.pre('findOneAndUpdate', mongoosePreUpdateMiddleware);
 
 const SubCategory = model<SubCategoryDocument>('subcategory', subcategorySchema);
 

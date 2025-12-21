@@ -1,4 +1,8 @@
 import { model, Schema, type Document } from 'mongoose';
+import {
+  mongoosePostDeleteMiddleware,
+  mongoosePreUpdateMiddleware,
+} from '@middlewares/upload.js';
 
 export interface IBrand {
   name: string;
@@ -24,10 +28,15 @@ export const brandSchema = new Schema<BrandDocument>(
       trim: true,
       lowercase: true,
     },
-    image: String,
+    image: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
+
+brandSchema.post('findOneAndDelete', mongoosePostDeleteMiddleware);
+brandSchema.pre('findOneAndUpdate', mongoosePreUpdateMiddleware);
 
 const Brand = model<BrandDocument>('brand', brandSchema);
 

@@ -1,4 +1,8 @@
 import { Document, model, Schema } from 'mongoose';
+import {
+  mongoosePostDeleteMiddleware,
+  mongoosePreUpdateMiddleware,
+} from '@middlewares/upload.js';
 
 export interface ICategory {
   name: string;
@@ -30,6 +34,9 @@ export const categorySchema = new Schema<CategoryDocument>(
     timestamps: true,
   },
 );
+
+categorySchema.post('findOneAndDelete', mongoosePostDeleteMiddleware);
+categorySchema.pre('findOneAndUpdate', mongoosePreUpdateMiddleware);
 
 const Category = model<CategoryDocument>('category', categorySchema);
 

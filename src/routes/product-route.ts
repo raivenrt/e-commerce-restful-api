@@ -16,18 +16,54 @@ import {
 } from '@lib/validators/product-validators.js';
 
 import validationResult from '@middlewares/validation-result.js';
+import upload from '@middlewares/upload.js';
+import { PRODUCTS_UPLOAD_DIR, PRODUCTS_UPLOAD_URL } from '../configs/config.js';
 
 const router = Router();
 
 router
   .route('/')
   .get(getProductsSchema, validationResult, getProducts)
-  .post(createProductSchema, validationResult, postProduct);
+  .post(
+    upload({
+      rootPath: PRODUCTS_UPLOAD_DIR,
+      rootPrefix: PRODUCTS_UPLOAD_URL,
+      stack: [createProductSchema, validationResult, postProduct],
+      fields: [
+        {
+          name: 'images',
+          maxCount: 8,
+        },
+        {
+          name: 'imageCover',
+          maxCount: 1,
+          single: true,
+        },
+      ],
+    }),
+  );
 
 router
   .route('/:id')
   .get(productIdParamSchema, validationResult, getSpecificProduct)
-  .put(updateProductSchema, validationResult, putUpdateSpecificProduct)
+  .put(
+    upload({
+      rootPath: PRODUCTS_UPLOAD_DIR,
+      rootPrefix: PRODUCTS_UPLOAD_URL,
+      stack: [updateProductSchema, validationResult, putUpdateSpecificProduct],
+      fields: [
+        {
+          name: 'images',
+          maxCount: 8,
+        },
+        {
+          name: 'imageCover',
+          maxCount: 1,
+          single: true,
+        },
+      ],
+    }),
+  )
   .delete(productIdParamSchema, validationResult, deleteSpecificProduct);
 
 export default router;

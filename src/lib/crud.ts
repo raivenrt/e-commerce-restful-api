@@ -1,5 +1,5 @@
 import type { Document, Model } from 'mongoose';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import ApiQueryFeatures, { type ApiQueryFeaturesOptions } from './api-query-features.js';
 import pagination from './pagination.js';
 import { responses } from './api-response.js';
@@ -93,10 +93,12 @@ export class CRUD<M extends Document> {
    * @param {Response} res - The Express response object.
    * @returns {Promise<void>} A Promise that resolves when the operation is complete.
    */
-  async POST_CREATE(req: Request, res: Response) {
+  async POST_CREATE(req: Request, res: Response, next: NextFunction) {
     const data = await this.options.model.create(req.body);
 
     responses.success({ ...data.toJSON() }, res, 201);
+
+    if (req.hasFiles === true && req.files) next();
   }
   /**
    * Retrieves a specific document from the model based on the document's ID and returns the document.
@@ -138,7 +140,7 @@ export class CRUD<M extends Document> {
    * @param {Response} res - The Express response object.
    * @returns {Promise<void>} A Promise that resolves when the operation is complete.
    */
-  async PUT_SPECIFIC(req: Request, res: Response) {
+  async PUT_SPECIFIC(req: Request, res: Response, next: NextFunction) {
     const itemId = req.params.id;
     const item = await this.options.model.findOneAndUpdate(
       {
@@ -152,5 +154,7 @@ export class CRUD<M extends Document> {
     );
 
     responses.success(item, res, 200);
+
+    if (req.hasFiles === true && req.files) next();
   }
 }

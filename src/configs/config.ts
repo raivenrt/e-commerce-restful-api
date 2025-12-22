@@ -21,6 +21,9 @@ export const SUBCATEGORY_UPLOAD_URL = '/images/subcategories';
 export const PRODUCTS_UPLOAD_DIR = path.join(IMAGES_UPLOAD_DIR, 'products');
 export const PRODUCTS_UPLOAD_URL = '/images/products';
 
+export const AVATARS_UPLOAD_DIR = path.join(IMAGES_UPLOAD_DIR, 'avatar');
+export const AVATARS_UPLOAD_URL = '/images/avatar';
+
 export const SERV: { path: string; root: string }[] = [
   {
     path: IMAGES_UPLOAD_URL,

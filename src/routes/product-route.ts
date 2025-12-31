@@ -17,7 +17,9 @@ import {
 
 import validationResult from '@middlewares/validation-result.js';
 import upload from '@middlewares/upload.js';
-import { PRODUCTS_UPLOAD_DIR, PRODUCTS_UPLOAD_URL } from '../configs/config.js';
+import { PRODUCTS_UPLOAD_DIR, PRODUCTS_UPLOAD_URL } from '@configs/config.js';
+import authGuard from '@middlewares/auth-guard.js';
+import { UserRoles } from '@models/user-model.js';
 
 const router = Router();
 
@@ -25,6 +27,7 @@ router
   .route('/')
   .get(getProductsSchema, validationResult, getProducts)
   .post(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN, UserRoles.MANAGER] }),
     upload({
       rootPath: PRODUCTS_UPLOAD_DIR,
       rootPrefix: PRODUCTS_UPLOAD_URL,
@@ -47,6 +50,7 @@ router
   .route('/:id')
   .get(productIdParamSchema, validationResult, getSpecificProduct)
   .put(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN, UserRoles.MANAGER] }),
     upload({
       rootPath: PRODUCTS_UPLOAD_DIR,
       rootPrefix: PRODUCTS_UPLOAD_URL,
@@ -64,6 +68,11 @@ router
       ],
     }),
   )
-  .delete(productIdParamSchema, validationResult, deleteSpecificProduct);
+  .delete(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
+    productIdParamSchema,
+    validationResult,
+    deleteSpecificProduct,
+  );
 
 export default router;

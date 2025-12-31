@@ -23,26 +23,38 @@
     "dev": "tsx watch ./src/configs/server.ts"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.6.2",
+    "@types/nodemailer": "^7.0.4",
+    "@types/pug": "^2.0.10",
+    "@types/useragent": "^2.3.4",
     "prettier": "3.6.2",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.3",
     "@types/morgan": "^1.9.10",
+    "@types/otp-generator": "^4.0.2",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.19.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.12",
+    "otp-generator": "^4.0.1",
+    "pug": "^3.0.3",
     "qs": "^6.14.0",
     "sharp": "^0.34.5",
     "slugify": "^1.6.6",
+    "useragent": "^2.3.0",
     "uuid": "^13.0.0"
   }
 }

@@ -5,7 +5,7 @@ import createIdParamValidator from '@lib/create-id-param-validator.js';
 import toOptionalSchema from '@lib/to-optional-schema.js';
 import type { Types } from 'mongoose';
 
-const schema: Schema = {
+export const schema: Schema = {
   name: {
     trim: true,
     isString: {

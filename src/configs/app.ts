@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import qs from 'qs';
+import cookieParser from 'cookie-parser';
 
 import apiV1Route from '@routes/router.js';
 import globalErrorHandler, { e404Handler } from '@base/src/controllers/error-handlers.js';
@@ -14,7 +15,11 @@ app.set(
   (queryString: string): Record<string, any> => qs.parse(queryString),
 );
 
-app.use(express.json({ limit: '2mb' }), express.urlencoded({ limit: '2mb' }));
+app.use(
+  express.json({ limit: '2mb' }),
+  express.urlencoded({ limit: '2mb' }),
+  cookieParser(),
+);
 
 if (NODE_ENV === 'development') {
   // Development Effect

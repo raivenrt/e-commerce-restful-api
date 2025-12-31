@@ -3,6 +3,7 @@ import { Router } from 'express';
 import validationResult from '@middlewares/validation-result.js';
 import { AVATARS_UPLOAD_DIR, AVATARS_UPLOAD_URL } from '@configs/config.js';
 import upload from '@middlewares/upload.js';
+import authGuard from '@middlewares/auth-guard.js';
 
 import {
   deleteSpecificUser,
@@ -19,12 +20,20 @@ import {
   userIdParamSchema,
 } from '@lib/validators/user-validators.js';
 
+import { UserRoles } from '@models/user-model.js';
+
 const router = Router();
 
 router
   .route('/')
-  .get(getUsersSchema, validationResult, getUsers)
+  .get(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
+    getUsersSchema,
+    validationResult,
+    getUsers,
+  )
   .post(
+    authGuard({ authenticated: true, roles: [UserRoles.MANAGER, UserRoles.ADMIN] }),
     upload({
       rootPath: AVATARS_UPLOAD_DIR,
       rootPrefix: AVATARS_UPLOAD_URL,
@@ -41,8 +50,14 @@ router
 
 router
   .route('/:id')
-  .get(userIdParamSchema, validationResult, getSpecificUser)
+  .get(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
+    userIdParamSchema,
+    validationResult,
+    getSpecificUser,
+  )
   .put(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
     upload({
       rootPath: AVATARS_UPLOAD_DIR,
       rootPrefix: AVATARS_UPLOAD_URL,
@@ -56,6 +71,11 @@ router
       ],
     }),
   )
-  .delete(userIdParamSchema, validationResult, deleteSpecificUser);
+  .delete(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
+    userIdParamSchema,
+    validationResult,
+    deleteSpecificUser,
+  );
 
 export default router;

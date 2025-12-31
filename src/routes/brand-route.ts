@@ -18,6 +18,8 @@ import {
 import validationResult from '@middlewares/validation-result.js';
 import { BRAND_UPLOAD_DIR, BRAND_UPLOAD_URL } from '@configs/config.js';
 import upload from '@middlewares/upload.js';
+import authGuard from '@middlewares/auth-guard.js';
+import { UserRoles } from '@models/user-model.js';
 
 const router = Router();
 
@@ -25,6 +27,7 @@ router
   .route('/')
   .get(getCategoriesSchema, validationResult, getBrands)
   .post(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN, UserRoles.MANAGER] }),
     upload({
       rootPath: BRAND_UPLOAD_DIR,
       rootPrefix: BRAND_UPLOAD_URL,
@@ -43,6 +46,7 @@ router
   .route('/:id')
   .get(brandIdParamSchema, validationResult, getSpecificBrand)
   .put(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN, UserRoles.MANAGER] }),
     upload({
       rootPath: BRAND_UPLOAD_DIR,
       rootPrefix: BRAND_UPLOAD_URL,
@@ -56,6 +60,11 @@ router
       ],
     }),
   )
-  .delete(brandIdParamSchema, validationResult, deleteSpecificBrand);
+  .delete(
+    authGuard({ authenticated: true, roles: [UserRoles.ADMIN] }),
+    brandIdParamSchema,
+    validationResult,
+    deleteSpecificBrand,
+  );
 
 export default router;

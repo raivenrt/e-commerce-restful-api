@@ -1,9 +1,9 @@
 import type { Schema } from 'express-validator';
 
 export default function toOptionalSchema(schema: Schema): Schema {
-  const updatedSchema = { ...schema };
+  const updatedSchema: Schema = {};
 
-  for (const key in updatedSchema) updatedSchema[key]!.optional = true;
+  for (const key in schema) updatedSchema[key] = { ...schema[key], optional: true };
 
   return updatedSchema;
 }

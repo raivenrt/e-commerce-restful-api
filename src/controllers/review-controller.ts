@@ -2,6 +2,9 @@ import type { RequestHandler } from 'express';
 
 import Review from '@models/review-model.js';
 import { CRUD } from '../lib/crud.js';
+import { UserRoles } from '../models/user-model.js';
+import { responses } from '../lib/api-response.js';
+import type { Types } from 'mongoose';
 
 const operations = new CRUD({
   model: Review,
@@ -68,3 +71,30 @@ export const putUpdateSpecificReview: RequestHandler = operations.PUT_SPECIFIC;
  * @response NO_CONTENT 204
  */
 export const deleteSpecificReviews: RequestHandler = operations.DELETE_SPECIFIC;
+
+export const swapUserId: RequestHandler = async (req, res, next) => {
+  req.body = req.body ?? {};
+  req.body.user = req.auth!?.user?._id?.toString();
+  next();
+};
+
+export const filterUserByRoles: RequestHandler = async (req, res, next) => {
+  const { user } = req.auth!;
+  const userRole = user.role;
+
+  if (UserRoles.USER === userRole) {
+    const review = await Review.findOne({
+      _id: req.params.id,
+      user: (user._id as Types.ObjectId).toString(),
+    });
+
+    if (!review)
+      return responses.failed(
+        { message: "you can't update/delete this review, you don't have permission" },
+        res,
+        401,
+      );
+  }
+
+  return next();
+};

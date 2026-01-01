@@ -31,7 +31,7 @@ const reviewSchema = new Schema<ReviewDocument>(
     },
     product: {
       type: Schema.Types.ObjectId,
-      ref: Product,
+      ref: 'product',
       required: [true, 'please fill this field.'],
     },
   },

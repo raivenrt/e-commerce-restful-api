@@ -1,4 +1,5 @@
 import { Document, model, Schema } from 'mongoose';
+import Review from './review-model.js';
 
 export interface IProduct {
   title: string;
@@ -105,8 +106,27 @@ export const productSchema = new Schema<ProductDocument>(
       default: 0,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
+  },
 );
+
+productSchema.virtual('reviews', {
+  ref: 'review',
+  foreignField: 'product',
+  localField: '_id',
+});
+
+productSchema.pre(/^findOne$/, function (next) {
+  (this as any).populate({ path: 'reviews', select: '-__v' });
+  next();
+});
 
 const Product = model<ProductDocument>('product', productSchema);
 

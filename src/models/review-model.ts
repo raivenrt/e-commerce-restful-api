@@ -40,6 +40,11 @@ const reviewSchema = new Schema<ReviewDocument>(
   },
 );
 
+reviewSchema.pre(/^(find|findOne)$/, function (next) {
+  (this as any).populate({ path: 'user', select: 'name avatar email -_id' });
+  next();
+});
+
 const Review = model<ReviewDocument>('review', reviewSchema);
 
 export default Review;

@@ -6,6 +6,7 @@ import brandsRoute from '@routes/brand-route.js';
 import productsRoute from '@routes/product-route.js';
 import usersRoute from '@routes/user-route.js';
 import authRoute from '@routes/auth-route.js';
+import reviewRoute from '@routes/review-route.js';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/brands', brandsRoute);
 router.use('/products', productsRoute);
 router.use('/users', usersRoute);
 router.use('/auth', authRoute);
+router.use('/reviews', reviewRoute);
 
 export default router;

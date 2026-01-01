@@ -39,10 +39,39 @@ const reviewSchema = new Schema<ReviewDocument>(
     timestamps: true,
   },
 );
+reviewSchema.statics.calcAverageRatings = async function (productId) {
+  const stats = await this.aggregate([
+    { $match: { product: productId } },
+    {
+      $group: {
+        _id: '$product',
+        ratingQuantity: { $sum: 1 },
+        avgRatings: { $avg: '$ratings' },
+      },
+    },
+  ]);
+
+  if (stats.length > 0) {
+    await Product.findByIdAndUpdate(productId, {
+      ratingQuantity: stats[0].ratingQuantity,
+      ratingsAverage: stats[0].avgRatings,
+    });
+  } else {
+    await Product.findByIdAndUpdate(productId, {
+      ratingQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
+};
 
 reviewSchema.pre(/^(find|findOne)$/, function (next) {
   (this as any).populate({ path: 'user', select: 'name avatar email -_id' });
   next();
+});
+
+reviewSchema.post(/^(create|findOneAndUpdate|findOneAndDelete)$/, async function (doc) {
+  const ReviewModel = model('review');
+  await (ReviewModel as any).calcAverageRatings(doc.product);
 });
 
 const Review = model<ReviewDocument>('review', reviewSchema);

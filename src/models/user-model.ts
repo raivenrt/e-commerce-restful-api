@@ -6,6 +6,7 @@ import {
   mongoosePostDeleteMiddleware,
   mongoosePreUpdateMiddleware,
 } from '@middlewares/upload.js';
+import type { ProductDocument } from './products-model.js';
 
 export const enum UserRoles {
   USER,
@@ -21,6 +22,7 @@ export interface IUser {
   avatar?: string;
   role?: UserRoles;
   passwordChangedAt?: Date;
+  wishlist: (Schema.Types.ObjectId | ProductDocument)[];
 }
 
 export interface UserDocument extends IUser, Document {
@@ -61,6 +63,12 @@ const userSchema = new Schema<UserDocument>(
       enum: [UserRoles.USER, UserRoles.ADMIN],
       default: UserRoles.USER,
     },
+    wishlist: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'product',
+      },
+    ],
   },
   {
     timestamps: true,

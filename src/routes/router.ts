@@ -7,6 +7,7 @@ import productsRoute from '@routes/product-route.js';
 import usersRoute from '@routes/user-route.js';
 import authRoute from '@routes/auth-route.js';
 import reviewRoute from '@routes/review-route.js';
+import wishlistRoute from '@routes/wishlist-route.js';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/products', productsRoute);
 router.use('/users', usersRoute);
 router.use('/auth', authRoute);
 router.use('/reviews', reviewRoute);
+router.use('/wishlist', wishlistRoute);
 
 export default router;

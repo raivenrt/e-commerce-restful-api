@@ -8,6 +8,17 @@ import {
 } from '@middlewares/upload.js';
 import type { ProductDocument } from './products-model.js';
 
+type Address = {
+  alias: string;
+  details: string;
+  phone: string;
+  pincode: number;
+  city: string;
+  state: string;
+  country: string;
+  _id: Schema.Types.ObjectId;
+};
+
 export const enum UserRoles {
   USER,
   ADMIN,
@@ -23,6 +34,7 @@ export interface IUser {
   role?: UserRoles;
   passwordChangedAt?: Date;
   wishlist: (Schema.Types.ObjectId | ProductDocument)[];
+  addresses: Address[];
 }
 
 export interface UserDocument extends IUser, Document {
@@ -67,6 +79,19 @@ const userSchema = new Schema<UserDocument>(
       {
         type: Schema.Types.ObjectId,
         ref: 'product',
+      },
+    ],
+    addresses: [
+      {
+        type: {
+          alias: String,
+          details: String,
+          phone: String,
+          pincode: Number,
+          city: String,
+          state: String,
+          country: String,
+        },
       },
     ],
   },

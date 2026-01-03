@@ -32,7 +32,7 @@ export default function authGuard(options: AuthGuardOptions): RequestHandler {
       if (!options.authenticated && !token) return next();
       else if (!options.authenticated && token)
         throw new Error('must be unauthenticated');
-      else if (options.authenticated && !token) throw new Error('no token provided');
+      else if (options.authenticated && !token) throw new Error('must be authenticated');
 
       if (token.startsWith('Bearer ')) token = token.slice(7, token.length);
 

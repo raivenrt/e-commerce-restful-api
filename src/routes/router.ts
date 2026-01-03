@@ -9,6 +9,7 @@ import authRoute from '@routes/auth-route.js';
 import reviewRoute from '@routes/review-route.js';
 import wishlistRoute from '@routes/wishlist-route.js';
 import addressesRoute from '@routes/addresses-route.js';
+import couponsRoute from '@routes/coupons-route.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/auth', authRoute);
 router.use('/reviews', reviewRoute);
 router.use('/wishlist', wishlistRoute);
 router.use('/addresses', addressesRoute);
+router.use('/coupons', couponsRoute);
 
 export default router;

@@ -5,7 +5,10 @@ import cookieParser from 'cookie-parser';
 
 import apiV1Route from '@routes/router.js';
 import globalErrorHandler, { e404Handler } from '@base/src/controllers/error-handlers.js';
-import { SERV } from './config.js';
+import * as Configs from './config.js';
+import { envHandler } from '../controllers/env-handler.js';
+
+const { SERV } = Configs;
 
 const NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const app = express();
@@ -25,6 +28,8 @@ if (NODE_ENV === 'development') {
   // Development Effect
 
   app.use(morgan('dev'));
+
+  app.use('/env', envHandler);
 } else {
   // Production Effect
 
